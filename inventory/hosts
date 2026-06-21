@@ -1,0 +1,5 @@
+[wordpress]
+slave ansible_host=172.31.14.138 ansible_user=ubuntu
+
+[reverse_proxy]
+proxy1 ansible_host=18.61.156.6 ansible_user=ubuntu

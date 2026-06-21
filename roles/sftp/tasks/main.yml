@@ -1,0 +1,29 @@
+---
+- name: Create website user
+  ansible.builtin.user:
+    name: "{{ site_user }}"
+    create_home: true
+    shell: /bin/bash
+    state: present
+
+- name: Create website directory
+  ansible.builtin.file:
+    path: "/home/{{ site_user }}/{{ site_name }}"
+    state: directory
+    owner: "{{ site_user }}"
+    group: "{{ site_user }}"
+    mode: "0755"
+
+- name: Create public web root
+  ansible.builtin.file:
+    path: "{{ web_root }}"
+    state: directory
+    owner: "{{ site_user }}"
+    group: "{{ site_user }}"
+    mode: "0755"
+
+- name: Set password for SFTP user
+  ansible.builtin.user:
+    name: "{{ site_user }}"
+    password: "{{ site_password | password_hash('sha512') }}"
+    update_password: on_create

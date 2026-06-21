@@ -1,0 +1,29 @@
+---
+- name: Install certbot packages
+  ansible.builtin.apt:
+    name:
+      - certbot
+      - python3-certbot-nginx
+    state: present
+    update_cache: yes
+
+- name: Check if SSL certificate already exists
+  ansible.builtin.stat:
+    path: "/etc/letsencrypt/live/{{ site_domain }}/fullchain.pem"
+  register: ssl_cert
+
+- name: Generate SSL certificate (ONLY if not exists)
+  ansible.builtin.command: >
+    certbot --nginx
+    -d {{ site_domain }}
+    --non-interactive
+    --agree-tos
+    -m admin@{{ site_domain }}
+    --redirect
+  when: not ssl_cert.stat.exists
+
+- name: Enable certbot auto-renew
+  ansible.builtin.service:
+    name: certbot.timer
+    state: started
+    enabled: true

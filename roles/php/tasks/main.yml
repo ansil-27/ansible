@@ -1,0 +1,27 @@
+---
+- name: Install PHP packages
+  apt:
+    name:
+      - php-fpm
+      - php-mysql
+      - php-cli
+      - php-curl
+      - php-gd
+      - php-mbstring
+      - php-xml
+      - php-xmlrpc
+      - php-soap
+      - php-intl
+      - php-zip
+    state: present
+    update_cache: yes
+
+- name: Enable php-fpm
+  service:
+    name: php8.3-fpm
+    enabled: true
+
+- name: Start php-fpm
+  service:
+    name: php8.3-fpm
+    state: started

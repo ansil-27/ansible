@@ -1,0 +1,33 @@
+---
+- name: Install MariaDB server
+  apt:
+    name:
+      - mariadb-server
+      - python3-pymysql
+    state: present
+    update_cache: yes
+
+- name: Enable MariaDB
+  service:
+    name: mariadb
+    enabled: true
+
+- name: Start MariaDB
+  service:
+    name: mariadb
+    state: started
+
+- name: Create WordPress database
+  community.mysql.mysql_db:
+    name: "{{ wp_database }}"
+    state: present
+    login_unix_socket: /run/mysqld/mysqld.sock
+
+- name: Create WordPress user
+  community.mysql.mysql_user:
+    name: "{{ wp_user }}"
+    password: "{{ wp_password }}"
+    priv: "{{ wp_database }}.*:ALL"
+    host: localhost
+    state: present
+    login_unix_socket: /run/mysqld/mysqld.sock

@@ -1,0 +1,17 @@
+site_domain: ansible.standardconvert.com
+
+wordpress_url: "https://ansible.standardconvert.com"
+wordpress_behind_proxy: true
+
+wp_user: wpuser
+wp_password: StrongPassword123
+wp_database: wordpressdb
+
+site_user: testuser
+site_password: StrongSftpPassword123
+
+site_name: myblog
+
+wordpress_private_ip: 172.31.14.138
+
+web_root: "/home/testuser/myblog/public"

@@ -1,0 +1,12 @@
+---
+- name: Install phpMyAdmin
+  ansible.builtin.apt:
+    name: phpmyadmin
+    state: present
+    force_apt_get: true
+    update_cache: yes
+- name: Create phpMyAdmin symlink
+  ansible.builtin.file:
+    src: /usr/share/phpmyadmin
+    dest: "{{ web_root }}/phpmyadmin"
+    state: link

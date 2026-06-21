@@ -1,0 +1,65 @@
+---
+- name: Install required packages
+  ansible.builtin.apt:
+    name:
+      - unzip
+    state: present
+    update_cache: yes
+
+- name: Check if WordPress is already installed
+  ansible.builtin.stat:
+    path: "{{ web_root }}/wp-config.php"
+  register: wordpress_installed
+
+- name: Download WordPress archive
+  ansible.builtin.get_url:
+    url: https://wordpress.org/latest.zip
+    dest: /tmp/wordpress.zip
+    mode: "0644"
+  when: not wordpress_installed.stat.exists
+
+- name: Extract WordPress archive
+  ansible.builtin.unarchive:
+    src: /tmp/wordpress.zip
+    dest: /tmp
+    remote_src: true
+  when: not wordpress_installed.stat.exists
+
+- name: Copy WordPress files
+  ansible.builtin.copy:
+    src: /tmp/wordpress/
+    dest: "{{ web_root }}/"
+    remote_src: true
+    owner: "{{ site_user }}"
+    group: "{{ site_user }}"
+  when: not wordpress_installed.stat.exists
+
+- name: Create wp-config.php
+  ansible.builtin.template:
+    src: wp-config.php.j2
+    dest: "{{ web_root }}/wp-config.php"
+    owner: "{{ site_user }}"
+    group: "{{ site_user }}"
+    mode: "0644"
+
+- name: Configure WordPress for reverse proxy HTTPS
+  ansible.builtin.blockinfile:
+    path: "{{ web_root }}/wp-config.php"
+    marker: "# {mark} ANSIBLE REVERSE PROXY"
+    insertbefore: "/\\* That's all, stop editing!"
+    block: |
+      if (
+          isset($_SERVER['HTTP_X_FORWARDED_PROTO']) &&
+          $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https'
+      ) {
+          $_SERVER['HTTPS'] = 'on';
+      }
+  when: wordpress_behind_proxy | default(false)
+  notify: restart php
+
+- name: Fix ownership of WordPress files
+  ansible.builtin.file:
+    path: "{{ web_root }}"
+    recurse: true
+    owner: "{{ site_user }}"
+    group: "{{ site_user }}"

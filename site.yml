@@ -1,0 +1,17 @@
+- name: Configure WordPress Server
+  hosts: wordpress
+  become: yes
+  roles:
+    - nginx
+    - php
+    - mariadb
+    - wordpress
+    - phpmyadmin
+    - sftp
+
+- name: Configure Reverse Proxy
+  hosts: reverse_proxy
+  become: yes
+  roles:
+    - reverse_proxy
+    - ssl
